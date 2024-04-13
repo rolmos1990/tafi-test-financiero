@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material Design File Upload</title>
+  <!-- Material Design Lite CSS -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    /* Fondo gris */
+    body {
+      background-color: #f0f0f0;
+      position: relative;
+    }
+    /* Centrar el contenido */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    /* Ocultar el campo de selección de archivo */
+    input[type="file"] {
+      display: none;
+    }
+    /* Card de archivo */
+    .file-card {
+      width: 300px;
+      margin-top: 20px;
+    }
+    .file-card .card-body {
+      display: flex;
+      align-items: center;
+    }
+    .file-icon {
+      margin-right: 10px;
+    }
+    /* Estilo para el texto del nombre del archivo */
+    #fileName {
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: 400;
+    }
+    /* Barra de notificaciones */
+    .notification-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      display: none;
+      animation: slideInDown 1s ease-in-out;
+    }
+    /* Label de estado */
+    .state-label {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #757575;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    .label-danger {
+      background-color: #FF6F00;
+    }
+    .label-warning {
+      background-color: #FFC107;
+    }
+    .label-success {
+      background-color: #558B2F;
+    }
+    /* Animación de entrada */
+    @keyframes slideInDown {
+      from {
+        transform: translateY(-5%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Label de estado -->
+    <span class="state-label">No Iniciado</span>
+
+    <h1 class="mdl-typography--display-2">Carga de documento</h1>
+    <div class="mdl-card mdl-shadow--2dp fade-in">
+      <div class="mdl-card__title">
+        <h2 class="mdl-card__title-text">Upload File</h2>
+      </div>
+      <div class="mdl-card__supporting-text">
+        <h5>Select a file to upload</h5>
+        <!-- Campo de selección de archivo oculto -->
+        <input type="file" id="fileInput" class="mdl-textfield__input mb-3">
+        <!-- Botón con icono -->
+        <label for="fileInput" class="mdl-button mdl-button--raised mdl-button--colored">
+          <i class="material-icons">cloud_upload</i> Upload
+        </label>
+      </div>
+    </div>
+
+    <!-- Card de archivo cargado -->
+    <div class="card file-card">
+      <div class="card-body">
+        <i class="material-icons file-icon">description</i>
+        <p class="card-text mdl-typography--body-1" id="fileName">No file selected</p>
+      </div>
+    </div>
+
+    <!-- Barra de notificaciones -->
+    <div class="notification-bar" id="notificationBar">Documento ha sido cargado</div>
+  </div>
+
+  <!-- Material Design Lite JS -->
+  <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+  <script>
+
+    // Función para mostrar el nombre del archivo seleccionado
+    function showFileName(event) {
+      const files = event.target.files;
+      const fileNameElement = document.getElementById('fileName');
+      const notificationBar = document.getElementById('notificationBar');
+      const stateLabel = document.querySelector('.state-label');
+
+      // Cambiar el estado del label
+      stateLabel.textContent = 'Cargando';
+      stateLabel.style.backgroundColor = '#FFCA28'; // Amarillo
+
+      // Mostrar el nombre del primer archivo seleccionado en la card
+      fileNameElement.textContent = files.length > 0 ? files[0].name : 'No file selected';
+
+      // Mostrar la barra de notificaciones
+      notificationBar.style.display = 'block';
+
+      // Ocultar la barra de notificaciones después de 3 segundos
+      setTimeout(() => {
+        notificationBar.style.display = 'none';
+        // Cambiar el estado del label
+        stateLabel.textContent = 'Completado';
+        stateLabel.style.backgroundColor = '#4CAF50'; // Verde
+      }, 3000);
+
+      generateSuscription();
+    }
+
+    // Escuchar cambios en la selección de archivos
+    document.getElementById('fileInput').addEventListener('change', showFileName);
+
+    // Clase AxiosService para realizar solicitudes HTTP utilizando Axios
+    class AxiosService {
+      // Método para realizar una solicitud POST
+      static async post(url, data) {
+        try {
+          const response = await axios.post(url, data);
+          return response.data;
+        } catch (error) {
+          console.error('Error:', error);
+          throw error;
+        }
+      }
+    }
+
+    // Método para llamar al servicio REST POST con parámetros simulados
+    function generateSuscription() {
+      // URL del servicio REST
+      const url = 'http://localhost:3000/generar-suscripcion';
+
+      // Parámetros simulados
+      const params = {
+        param1: 'value1',
+        param2: 'value2',
+        param3: 'value3'
+      };
+
+      // Llamar al servicio REST utilizando AxiosService
+      AxiosService.post(url, params)
+        .then(response => {
+          console.log('Response from REST service:', response);
+        })
+        .catch(error => {
+          console.error('Error calling REST service:', error);
+        });
+    }
+
+    // Llamar al método para probar la llamada al servicio REST
+    //callRestService();
+  </script>
+
+  <script>
+    //recibir actualizaciones...
+    const ws = new WebSocket('ws://localhost:3000');
+
+    // Manejar mensajes del servidor
+    ws.onmessage = (event) => {
+      console.log('event data: ', event);
+    };
+
+    // Manejar errores
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    // Manejar cierre de la conexión
+    ws.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+  </script>
+</body>
+</html>
