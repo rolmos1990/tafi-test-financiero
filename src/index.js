@@ -1,22 +1,11 @@
 const express = require('express');
 const http = require('http');
-const WebSocket = require('ws');
-const grpc = require('grpc');
 const readline = require('readline');
-const { Kafka } = require('kafkajs');
 
-
-const kafka = new Kafka({
-    clientId: 'my-app',
-    brokers: ['kafka1:9092', 'kafka2:9092']
-});
-
-const consumer = kafka.consumer({ groupId: 'test-group' });
-
-
-const NotesDefinition = grpc.load(require('path').resolve('../proto/notes.proto'));
-
-const client = new NotesDefinition.NoteService('localhost:50051', grpc.credentials.createInsecure());
+const Consumer = require('./consumer');
+const WebSocketManager = require('./WebSocketManager');
+const WebSocketController = require('./WebSocketController');
+const { client, publishNewRequest } = require('./publisher');
 
 const app = express();
 
@@ -25,102 +14,42 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-// Función para enviar notificaciones a todos los clientes conectados
-function sendNotification(wss, info = 'New subscription generated') {
-    wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(info);
-        }
-    });
+async function addSubscribers(){
+    await Consumer.connect();
 }
 
-// Establecer la ruta para la conexión WebSocket
-function startWebSocketServer(server) {
-    const wss = new WebSocket.Server({ server });
+// WebSocket Manager Instance
+const server = http.createServer(app);
+const webSocketController = new WebSocketController(client);
+const webSocketManager = new WebSocketManager(server, webSocketController);
 
-    wss.on('connection', (ws) => {
-        console.log('Client connected');
-
-        // Manejar cierre de la conexión
-        ws.on('close', () => {
-            console.log('Client disconnected');
-        });
-    });
-
-    // Generar aqui conexione de eventos salientes...
-    app.post('/generar-suscripcion', (req, res) => {
-        // Generar la suscripción y enviar notificación a los clientes conectados
-
-        const newNote = {
-            id: Math.random().toString(36).substring(7),
-            title: "Ramon",
-            description: "Prueba..." + Math.random().toString(36).substring(7)
-        };
-        //publicar aqui en el evento..
-        client.publish(newNote, (err, response) => {
-            if (err) {
-                console.error('Error publishing note:', err);
-            } else {
-                console.log('Note published successfully:', response);
-            }
-        });
-
-        sendNotification(wss);
-        res.send('New subscription generated');
-    });
-
-    return wss;
+// Notification Manager
+function startWebSocketServer() {
+    webSocketManager.setupRoutes(app);
 }
 
-// Establecer el motor de plantillas
+// Views
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 
-// Ruta para renderizar la plantilla HTML
+// Render html index
 app.get('/', (req, res) => {
-    res.render('index', { title: 'Welcome to My Website', message: 'Hello, world!' });
+    res.render('index', { title: 'Tafi - Simulacion con Orkes', message: 'Proyecto de simulacion para orkes' });
 });
 
+//connect with publish in tafi-events
 app.get('/publicar', (req, res) => {
-
-    const newRequest = {
-        id: Math.random().toString(36).substring(7),
-        title: "prueba",
-        description: "Pruebas123123321"
-    };
-
-    client.publish(newRequest, (err, response) => {
-        if (err) {
-            console.error('Error publishing note:', err);
-        } else {
-            console.log('Note published successfully:', response);
-        }
-    });
+    publishNewRequest();
+    res.send('New request published');
 });
 
-const runConsumer = async () => {
-    // Conecta el consumidor a Kafka
-    await consumer.connect();
-
-    // Suscribe al consumidor a un topic
-    await consumer.subscribe({ topic: 'test-topic', fromBeginning: true });
-
-    // Maneja eventos recibidos
-    await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-            console.log({
-                value: message.value.toString(),
-            });
-        },
-    });
-};
-
-// Iniciar el servidor
+//Server start
 const port = 3000;
-const server = http.createServer(app);
-const wss = startWebSocketServer(server);
+startWebSocketServer();
+
+// Suscriptor registers
+addSubscribers();
 
 server.listen(port, () => {
-    runConsumer().catch(console.error);
     console.log(`Server is running on http://localhost:${port}`);
 });

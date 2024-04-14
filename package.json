@@ -7,7 +7,7 @@
     "start:server": "node src/server.js",
     "start:client2": "node src/index.js",
     "start:client": "node src/client.js",
-    "compile": "protoc --js_out=import_style=commonjs,binary:. proto/notes.proto"
+    "compile": "protoc --js_out=import_style=commonjs,binary:. proto/event.proto"
   },
   "repository": {
     "type": "git",

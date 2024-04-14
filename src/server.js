@@ -1,5 +1,5 @@
 const grpc = require('grpc');
-const NotesDefinition = grpc.load(require('path').resolve('../proto/notes.proto'));
+const NotesDefinition = grpc.load(require('path').resolve('./proto/notes.proto'));
 
 const server = new grpc.Server();
 
