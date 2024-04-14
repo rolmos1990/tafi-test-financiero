@@ -1,4 +1,4 @@
-const definitions = require('./notes_pb')
+const definitions = require('./event')
 
 const note = new definitions.Note()
 note.setId(require('crypto').randomBytes(16).toString('hex'))
