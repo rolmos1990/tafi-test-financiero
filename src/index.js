@@ -3,14 +3,22 @@ const http = require('http');
 const WebSocket = require('ws');
 const grpc = require('grpc');
 const readline = require('readline');
+const { Kafka } = require('kafkajs');
+
+
+const kafka = new Kafka({
+    clientId: 'my-app',
+    brokers: ['kafka1:9092', 'kafka2:9092']
+});
+
+const consumer = kafka.consumer({ groupId: 'test-group' });
+
 
 const NotesDefinition = grpc.load(require('path').resolve('../proto/notes.proto'));
 
 const client = new NotesDefinition.NoteService('localhost:50051', grpc.credentials.createInsecure());
 
 const app = express();
-
-const suscriptionClient = client.subscribe({});
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -37,16 +45,6 @@ function startWebSocketServer(server) {
         ws.on('close', () => {
             console.log('Client disconnected');
         });
-    });
-
-    //recibir aqui los eventos de la suscripcion
-    suscriptionClient.on('data', (note) => {
-        //console.log('recibi data de notas...', note.title);
-        sendNotification(wss, note.title);
-    });
-
-    suscriptionClient.on('end', () => {
-        console.log('Subscription ended');
     });
 
     // Generar aqui conexione de eventos salientes...
@@ -100,11 +98,29 @@ app.get('/publicar', (req, res) => {
     });
 });
 
+const runConsumer = async () => {
+    // Conecta el consumidor a Kafka
+    await consumer.connect();
+
+    // Suscribe al consumidor a un topic
+    await consumer.subscribe({ topic: 'test-topic', fromBeginning: true });
+
+    // Maneja eventos recibidos
+    await consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+            console.log({
+                value: message.value.toString(),
+            });
+        },
+    });
+};
+
 // Iniciar el servidor
 const port = 3000;
 const server = http.createServer(app);
 const wss = startWebSocketServer(server);
 
 server.listen(port, () => {
+    runConsumer().catch(console.error);
     console.log(`Server is running on http://localhost:${port}`);
 });
