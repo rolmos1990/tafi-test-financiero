@@ -1,7 +1,7 @@
 const grpc = require('grpc');
 
-const NotesDefinition = grpc.load(require('path').resolve('./proto/event.proto'));
-const client = new NotesDefinition.NoteService('localhost:50051', grpc.credentials.createInsecure());
+const EventDefinition = grpc.load(require('path').resolve('./proto/event.proto'));
+const client = new EventDefinition.event.Event('localhost:50051', grpc.credentials.createInsecure());
 
 //cambio de estado de flujo de trabajo
 function changeWorkflowState(id, estado, operacion){
