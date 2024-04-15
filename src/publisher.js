@@ -13,23 +13,22 @@ class EventPublisher {
         return this.client;
     }
 
-    changeWorkflowState(id, estado, operacion) {
-        const body = { id, estado, operacion };
+    changeWorkflowState(body) {
         return { topic: "tafi-orquestador-flujo-trabajo-estado-cambiado", body };
     }
 
-    newOrquestation(nombre, descripcion, metadata) {
-        console.log("generar nueva orquestacion: ", nombre);
+    newOrquestation(body) {
+        console.log("generar nueva orquestacion: ", body.nombre);
         const workFlowId = "WF_SolicitarArchivoDeConciliacion";
         const cronExpression = "0 * * ? * *";
 
-        const body = {
-            nombre: nombre,
-            descripcion: descripcion,
+        const request = {
+            nombre: body.nombre,
+            descripcion: body.descripcion,
             dominio: "Financiera",
             subdominio: "Conciliaciones",
             definiciones: {
-                metadata: metadata,
+                metadata: body.metadata,
                 fechaInicio: "2024-04-14",
                 fechaFinalizacion: null,
                 reglas: [
@@ -43,23 +42,24 @@ class EventPublisher {
             }
         };
 
-        return { topic: "tafi-orquestador-nueva-orquestacion", body };
+        return { topic: "tafi-orquestador-nueva-orquestacion", body: request };
     }
 
-    editOrquestation(id, nombre, descripcion) {
+    editOrquestation(body) {
+        console.log("generar nueva orquestacion: ", body.nombre);
         const workFlowId = "WF_SolicitarArchivoDeConciliacion";
         const cronExpression = "0 0 1 * * ?";
 
-        const body = {
-            id: id,
-            nombre: nombre,
-            descripcion: descripcion,
+        const request = {
+            id: body.id,
+            nombre: body.nombre,
+            descripcion: body.descripcion,
             dominio: "Financiera",
             subdominio: "Conciliaciones",
             definiciones: {
-                metadata: { entidadFinancieraId: "1234567891" },
-                fechaInicio: "2024-04-12",
-                fechaFinalizacion: "2024-04-13",
+                metadata: body.metadata,
+                fechaInicio: "2024-04-14",
+                fechaFinalizacion: null,
                 reglas: [
                     {
                         tipo: ["Ejecucion"],
@@ -71,7 +71,7 @@ class EventPublisher {
             }
         };
 
-        return { topic: "tafi-orquestador-nueva-orquestacion", body };
+        return { topic: "tafi-orquestador-nueva-orquestacion", body: request };
     }
 
     async publishNewRequest({ topic, body }) {
