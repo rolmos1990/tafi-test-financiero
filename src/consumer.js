@@ -23,7 +23,7 @@ const consumer = redpanda.consumer({ groupId });
 
 console.log("Agrego consumer..");
 
-async function connect(onReceiveMessage) {
+async function connect(webSocketManager) {
 
   console.log("Intento conectarme...");
   try {
@@ -44,7 +44,13 @@ async function connect(onReceiveMessage) {
         formattedValue = JSON.parse(message.value);
       }
       //formattedValue .. ejecucion.estadoFlujoTrabajo (Pausado, EnEjecucion), flujoId, configuracion
-      onReceiveMessage(topic, formattedValue);
+      
+      const _data = {
+        topic: topic,
+        data: formattedValue
+      };
+
+      webSocketManager.sendNotification(_data);
     },
   });
 

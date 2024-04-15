@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Material Design File Upload</title>
+  <title>Financiero Orkes - Test</title>
   <!-- Material Design Lite CSS -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
@@ -92,22 +92,84 @@
   </style>
 </head>
 <body>
+  <dialog id="modal" class="mdl-dialog">
+    <h4 class="mdl-dialog__title">Financiero <small>Parametros</small></h4>
+    <div class="mdl-dialog__content">
+      <!-- Contenido del modal -->
+      <form action="#">
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="text" id="nombre">
+          <label class="mdl-textfield__label" for="nombre">Nombre</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="text" id="separador">
+          <label class="mdl-textfield__label" for="separador">Tabulacion</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="text" id="calificador">
+          <label class="mdl-textfield__label" for="separador">Calificador de Texto</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="text" id="encabezado">
+          <label class="mdl-textfield__label" for="separador">Linea Encabezado</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="text" id="piedepagina">
+          <label class="mdl-textfield__label" for="separador">Linea Pie de Pagina</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <select class="mdl-textfield__input" id="tipoDeArchivo">
+            <option value="" disabled selected></option>
+            <option value="option1">CSV</option>
+            <option value="option2">PDF</option>
+          </select>
+          <label class="mdl-textfield__label" for="tipoDeArchivo">Tipo de Archivo</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <select class="mdl-textfield__input" id="automatica">
+            <option value="" disabled selected></option>
+            <option value="true">Si</option>
+            <option value="false">No</option>
+          </select>
+          <label class="mdl-textfield__label" for="automatica">Automatica?</label>
+        </div>
+        </div>
+        <!-- Agregar más campos de texto según sea necesario -->
+      </form>
+    </div>
+    <div class="mdl-dialog__actions">
+      <!-- Botón para guardar -->
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="guardarConfig">Guardar</button>
+      <!-- Botón para cerrar -->
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised" id="cerrarModal">Cerrar</button>
+    </div>
+  </dialog>
+
   <div class="container">
+    <input type="hidden" value="" id="executionId" />
     <!-- Label de estado -->
     <span class="state-label">No Iniciado</span>
+    
+    <div class="mdl-card__title">
+    <h4 class="mdl-typography--display-1">Subir archivo de Pagos</h4>
+    </div>
+    <div class="mdl-button--raised" style="text-align:center;">
+    <p class="mdl-card__supporting-text"> ::::::::: Interfaz de prueba para Orkes ::::::::: </p>
+    <a href="#modal">Generar configuracion</a>
+    <img class="img" style="width:120px; text-align:center;" src="https://avatars.githubusercontent.com/u/92276411?s=280&v=4" />
+    </div>
 
-    <h1 class="mdl-typography--display-2">Carga de documento</h1>
     <div class="mdl-card mdl-shadow--2dp fade-in">
       <div class="mdl-card__title">
-        <h2 class="mdl-card__title-text">Upload File</h2>
+        <h2 class="mdl-card__title-text">Subir archivo</h2>
       </div>
       <div class="mdl-card__supporting-text">
-        <h5>Select a file to upload</h5>
+        <h5>Seleccione archivo de conciliaciones</h5>
         <!-- Campo de selección de archivo oculto -->
         <input type="file" id="fileInput" class="mdl-textfield__input mb-3">
         <!-- Botón con icono -->
-        <label for="fileInput" class="mdl-button mdl-button--raised mdl-button--colored">
-          <i class="material-icons">cloud_upload</i> Upload
+        <label id="label-fileinput" for="fileInput" class="mdl-button mdl-button--raised">
+          <i class="material-icons">cloud_upload</i> &nbsp; Subir
         </label>
       </div>
     </div>
@@ -116,7 +178,7 @@
     <div class="card file-card">
       <div class="card-body">
         <i class="material-icons file-icon">description</i>
-        <p class="card-text mdl-typography--body-1" id="fileName">No file selected</p>
+        <p class="card-text mdl-typography--body-1" id="fileName">No hay archivos</p>
       </div>
     </div>
 
@@ -146,18 +208,78 @@
       notificationBar.style.display = 'block';
 
       // Ocultar la barra de notificaciones después de 3 segundos
-      setTimeout(() => {
+      //setTimeout(() => {
+
+      //}, 3000);
+
+      const request = {
+        type: "change_workflow_state",
+        data: {
+          id: document.getElementById("executionId").value,
+          estado: "Continuado",
+          operacion: "Carga de Documento"
+        }
+      };
+
+      addNewRequest(request.type, request.data, onComplete = function() {
+        
         notificationBar.style.display = 'none';
         // Cambiar el estado del label
-        stateLabel.textContent = 'Completado';
-        stateLabel.style.backgroundColor = '#4CAF50'; // Verde
-      }, 3000);
+        //stateLabel.textContent = 'Completado';
+        //stateLabel.style.backgroundColor = '#4CAF50'; // Verde
 
-      generateSuscription();
+      });
+
     }
+
+    function disabledLoadFile(){
+          document.getElementById("label-fileinput").className = "mdl-button mdl-button--raised mdl-button--disabled";
+          document.getElementById("fileInput").disabled = true;
+    }
+    function enabledLoadFile(){
+          document.getElementById("label-fileinput").className = "mdl-button mdl-button--raised mdl-button--colored";
+          document.getElementById("fileInput").disabled = false;
+    }
+
+    function cambiarEstado(estado = "No iniciado") {
+      const stateLabel = document.querySelector('.state-label');
+      let label = estado;
+
+      let color;
+      switch (estado) {
+        case "Pausado":
+          label = "Pendiente de Carga";
+          color = '#FFCA28'; // Amarillo
+          enabledLoadFile();
+          break;
+        case "EnEjecucion":
+          label = "Iniciado";
+          color = '#2196F3'; // Azul
+          disabledLoadFile();
+          break;
+        case "Continuado":
+        label = "Procesando";
+        color = '#2196F3'; // Azul
+        disabledLoadFile();
+        break;
+        case "Terminado":
+          label = "Completado";
+          color = '#4CAF50'; // Verde
+          disabledLoadFile();
+          break;
+        default:
+          label = "No iniciado";
+          color = '#9E9E9E'; // Gris
+          disabledLoad();
+          break;
+      }
+      stateLabel.style.backgroundColor = color;
+      stateLabel.textContent = label;
+}
 
     // Escuchar cambios en la selección de archivos
     document.getElementById('fileInput').addEventListener('change', showFileName);
+    disabledLoadFile();
 
     // Clase AxiosService para realizar solicitudes HTTP utilizando Axios
     class AxiosService {
@@ -181,7 +303,7 @@
       // Parámetros simulados
       const params = {
         type: type,
-        body: body
+        data: body
       };
 
       // Llamar al servicio REST utilizando AxiosService
@@ -199,13 +321,39 @@
   </script>
 
   <script>
+
+    document.getElementById("fileInput").disabled = true;
     //recibir actualizaciones...
     const ws = new WebSocket('ws://localhost:3000');
 
     // Manejar mensajes del servidor
     ws.onmessage = (event) => {
+      if(event.data){
+        console.log("has data..");
+        const _data = JSON.parse(event.data);
+        const _topic = _data.topic;
+        const _body = _data.data;
+        console.log("data topic", _topic);
+        if(_topic){
+          console.log("has topic..");
+          switch(_topic){
+            case "tafi-orquestador-flujo-de-trabajo-estado-notificacion":
+              if(_body.ejecucion.estadoFlujoTrabajo == "EnEjecucion" || _body.ejecucion.estadoFlujoTrabajo == "Pausado"){
+                document.getElementById("executionId").value = _body.ejecucion.id;
+              }
+              console.log("Nuevo estado ejecucion...", _body.ejecucion.estadoFlujoTrabajo);
+              cambiarEstado(_body.ejecucion.estadoFlujoTrabajo);
+            break;
+            case "":
+            break;  
+            default:
+          }
+        }
+      }
       console.log('event data: ', event);
     };
+
+    cambiarEstado();
 
     // Manejar errores
     ws.onerror = (error) => {
@@ -216,6 +364,68 @@
     ws.onclose = () => {
       console.log('WebSocket connection closed');
     };
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('modal');
+      const openModalBtn = document.querySelector('[href="#modal"]');
+      const cerrarModalBtn = document.getElementById('cerrarModal');
+
+      // Función para abrir el modal
+      openModalBtn.addEventListener('click', function() {
+        modal.showModal();
+      });
+
+      // Función para cerrar el modal
+      cerrarModalBtn.addEventListener('click', function() {
+        modal.close();
+      });
+
+      // Función para guardar la configuración
+      const guardarConfigBtn = document.getElementById('guardarConfig');
+      guardarConfigBtn.addEventListener('click', function() {
+        
+        // Obtener valores de los campos
+        const nombre = document.getElementById('nombre');
+        const separador = document.getElementById('separador');
+        const calificador = document.getElementById('calificador');
+        const encabezado = document.getElementById('encabezado');
+        const piedepagina = document.getElementById('piedepagina');
+        const tipoDeArchivo = document.getElementById('tipoDeArchivo');
+        const automatica = document.getElementById('automatica');
+        
+        // Llamar al método enviar con los valores como argumentos
+        
+        const metadata = {
+          idFinanciera: 123,
+          separador: separador.value,
+          calificador: calificador.value,
+          encabezado: encabezado.value,
+          piedepagina: piedepagina.value,
+          tipoDeArchivo: tipoDeArchivo.value,
+          automatica: automatica.value ? true: false
+        };
+
+        addNewRequest("new_orquestation", {
+            nombre: nombre.value,
+            descripcion: "Financiero - " + nombre,
+            metadata: metadata
+          }, function(resp) {
+              separador.value = "";
+              calificador.value = "";
+              encabezado.value = "";
+              piedepagina.value = "";
+              tipoDeArchivo.value = "";
+              automatica.value = "";
+
+              //editar orquestacion con la respuesta
+        });
+
+        // Cerrar el modal después de enviar los valores
+        modal.close();
+      });
+
+    });
   </script>
 </body>
 </html>
