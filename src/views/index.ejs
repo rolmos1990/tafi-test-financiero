@@ -174,24 +174,23 @@
     }
 
     // Método para llamar al servicio REST POST con parámetros simulados
-    function generateSuscription() {
+    function addNewRequest(type, body, callback) {
       // URL del servicio REST
-      const url = 'http://localhost:3000/generar-suscripcion';
+      const url = 'http://localhost:3000/publicar';
 
       // Parámetros simulados
       const params = {
-        param1: 'value1',
-        param2: 'value2',
-        param3: 'value3'
+        type: type,
+        body: body
       };
 
       // Llamar al servicio REST utilizando AxiosService
       AxiosService.post(url, params)
         .then(response => {
-          console.log('Response from REST service:', response);
+          callback(response)
         })
         .catch(error => {
-          console.error('Error calling REST service:', error);
+          callback(error);
         });
     }
 

@@ -5,7 +5,7 @@ const readline = require('readline');
 const Consumer = require('./consumer');
 const WebSocketManager = require('./WebSocketManager');
 const WebSocketController = require('./WebSocketController');
-const { client, publishNewRequest } = require('./publisher');
+const { client, publishNewRequest, changeWorkflowState, newOrquestation } = require('./publisher');
 
 const app = express();
 
@@ -39,7 +39,16 @@ app.get('/', (req, res) => {
 
 //connect with publish in tafi-events
 app.get('/publicar', (req, res) => {
-    publishNewRequest();
+    
+    const body = req.body;
+    let request;
+    switch(body.type){
+        case "new_orquestation": request = newOrquestation(req.body.data);
+        case "change_workflow_state": request = changeWorkflowState(req.body.data);
+        default: 
+    }
+
+    publishNewRequest(newOrquestation(request));
     res.send('New request published');
 });
 
